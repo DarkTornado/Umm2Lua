@@ -20,7 +20,7 @@ public class Parser {
 		/* 엄
 		 * 변수에 값 넣기 */
 		src = src.replace("엄", "어 = ");
-
+		
 		/* 식! & 식ㅋ
 		 * 출력 */
 		src = print(src);
@@ -28,6 +28,10 @@ public class Parser {
 		/* 준
 		 * goto */
 		src = jmp(src);
+
+		/* 동탄
+		 * if */
+		src = conditional(src);
 		
 		return src;
 	}
@@ -73,11 +77,16 @@ public class Parser {
 	}
 	
 	private String print(String src) {
-		if (!src.startsWith("식")) return src;
-		if (src.endsWith("!")) {
-			return "print(" + src.substring(1, src.length() - 1) + ")";
+		if (!src.contains("식")) return src;
+		int start = src.indexOf('식');
+		if (src.contains("!")) {
+			int end = src.indexOf('!');
+			if(start > end) return src;  //Compile Error 넣을꼬얌!
+			return "print(" + src.substring(start + 1, end) + ")";
 		} else if(src.endsWith("ㅋ")) {
-			return "print(string.char(" + src.substring(1, src.length() - 1) + "))";
+			int end = src.indexOf('ㅋ');
+			if(start > end) return src;  //Compile Error 넣을꼬얌!
+			return "print(string.char(" + src.substring(start + 1, end) + "))";
 		} else {
 			//Compile Error 넣을꼬얌!
 			return src;
@@ -85,10 +94,24 @@ public class Parser {
 	}
 	
 	private String jmp(String src) {
-		if (!src.startsWith("준")) return src;
-		return "goto label"+src.substring(1);		
+		if (!src.contains("준")) return src;
+		int start = src.indexOf('준');
+		int end = -1;
+		for (int n = start; n < src.length(); n++) {
+			if (!Character.isDigit(src.charAt(n)) && end != -1) break;
+			if (Character.isDigit(src.charAt(n))) end = n;
+		}
+		if(start > end) return src;  //Compile Error 넣을꼬얌!
+		return src.substring(0, start) + "goto label_" + src.substring(start + 1);
 	}
-
+	
+	private String conditional(String src) {
+		if (!src.contains("동탄") || !src.contains("?")) return src; //Compile Error 넣을꼬얌!
+		String[] s = src.split("\\?");
+		return "if " + s[0].substring(s[0].indexOf("동탄") + 2) + " == 0 then\n" + 
+				s[1] + "\n" + 
+		        "end"; 
+	}
 	
 
 }
