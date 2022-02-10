@@ -19,6 +19,7 @@ public class LuaExecutor {
 	
 	public void execute(String src) {
         Globals globals = JsePlatform.standardGlobals();
+        globals.set("print", CoerceJavaToLua.coerce(new LuaApi.Print()));
         LuaValue chunk = globals.load(src);
         chunk.call();
 	}
